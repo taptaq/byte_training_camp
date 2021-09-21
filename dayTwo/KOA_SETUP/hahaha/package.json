@@ -1,0 +1,17 @@
+{
+  "name": "hahaha",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./index.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.13.1",
+    "koa-body": "^4.2.0",
+
+    "koa-router": "^10.1.1",
+
+    "koa-views": "^7.0.1"
+  }
+}

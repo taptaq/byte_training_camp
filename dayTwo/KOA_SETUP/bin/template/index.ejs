@@ -1,0 +1,37 @@
+const Koa = require('koa');
+const path=require('path');
+
+<% if(router){%>   
+    const Router = require('koa-router')
+<%}%>
+
+const views = require('koa-views')
+
+<% if(static){%>   
+const static = require('koa-static')
+<%}%>
+
+const app = new Koa()
+
+<% if(static){%>   
+app.use(static(path.join(__dirname, '/static')));
+<%}%>
+
+//模板引擎
+app.use(views(path.join(__dirname, '/views'), { extension: 'pug' }));
+
+<% if(router){%>
+const router=new Router();
+router.get('/',(ctx)=>{
+    ctx.body='hello welcome';
+})
+app.use(router.routes());
+<%}%>
+
+app.on('error', function(err, ctx){
+  console.error('server error', err);
+});
+
+app.listen(<%= port%>,()=>{
+    console.log('open server localhost:<%= port%>')
+})

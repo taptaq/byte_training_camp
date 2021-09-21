@@ -1,0 +1,17 @@
+{
+  "name": "KOA_SETUP",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": "./bin/index.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "rimraf ./haha && KOA_SETUP index.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "execa": "^5.1.1",
+    "inquirer": "^8.1.5",
+    "prettier": "^2.4.1"
+  }
+}
