@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            list-style: none;
+        }
+
+        .item {
+            width: 250px;
+            height: 280px;
+            position: absolute;
+            left:0;
+            top:0;
+            right:0;
+            bottom:0;
+            margin:auto;
+            border:1px solid #000;
+            text-align: center;
+      
+            cursor: pointer;
+        }
+
+        .item .list{
+            width:100%;
+            height:100%;
+            overflow: hidden;
+        }
+
+        .item .list li{
+            margin-bottom:5px;
+            padding:5px 0;
+            background: rgba(0,0,0,0.2);
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <div class='item'>
+        <ul class='list'></ul>
+    </div>
+
+    <script src='gesture.js'></script>
+    <script>
+        let list = document.getElementsByClassName('list')[0];
+        list.innerHTML=new Array(50).fill(0).map((item,index)=>`<li>这是第${index}个元素</li>`).join('');
+      
+        enableGesture(list);
+        
+        list.addEventListener('panStart',(e)=>{
+            console.log('panstart')
+        })
+        list.addEventListener('pan',(e)=>{
+            console.log('pan')
+        })
+        list.addEventListener('panEnd',(e)=>{
+            console.log('panend')
+        })
+        list.addEventListener('longPressStart',(e)=>{
+            console.log('longPressStart')
+        })
+        list.addEventListener('longPressCancel',(e)=>{
+            console.log('longPressCancel')
+        })
+        list.addEventListener('longPressEnd',(e)=>{
+            console.log('longPressEnd')
+        })
+        list.addEventListener('tap',(e)=>{
+            console.log('tap')
+        })
+    </script>
+</body>
+
+</html>
