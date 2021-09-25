@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h2 id='app'>{{title}}</h2>
+
+
+    <script>
+        const Vue = {
+            createRenderer({ querySelector, insert }) {
+                // 返回渲染器
+                return {
+                    createApp(options) {
+                        return {
+                            // 挂载的方法
+                            mount(selector) {
+                                // 找到宿主元素
+                                const parent = querySelector(selector);
+
+                                // 渲染页面（若有template：直接编译template。否则用户直接编写render）
+                                if (!options.render) {
+                                    options.render = this.compile(parent.innerHTML);
+                                }
+
+                                // 处理与Vue2的兼容
+                                // setup和其他选择中的数据选择（优先使用setup的数据）
+                                if (options.setup) {
+                                    this.setupState = options.setup();
+                                }
+
+                                // 没定义setup就使用data的数据（或其他，这里只处理data中的）
+                                if (options.data) {
+                                    this.data = options.data();
+                                }
+
+                                const proxy = new Proxy(this, {
+                                    get(target, key) {
+                                        // 先从setup取数据，没有则从data中取
+                                        if (target.setupState && key in target.setupState) {
+                                            return target.setupState[key];
+                                        }
+                                        else {
+                                            return target.data[key];
+                                        }
+                                    },
+
+                                    set(target, key, val) {
+                                        if (target.setupState && key in target.setupState) {
+                                            return target.setupState[key] = val;
+                                        }
+                                        else {
+                                            return target.data[key] = val;
+                                        }
+                                    }
+                                })
+
+
+                                // 更新视图
+                                this.update = function () {
+                                    const el = options.render.call(proxy);
+
+                                    // 追加到宿主区域中
+                                    parent.innerHTML = '';
+                                    insert(el, parent);
+                                }
+
+                                // 初始渲染视图的时候更新一次
+                                this.update();
+
+                            },
+
+                            // 编译的方法
+                            compile() {
+                                return function render() {
+                                    const h2 = document.createElement('h2');
+                                    h2.textContent = this.title;
+                                    return h2;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+
+            createApp(options) {
+                // 创建一个web平台特有的渲染器
+                const renderer = Vue.createRenderer({
+                    querySelector(sel) {
+                        return document.querySelector(sel);
+                    },
+
+                    insert(el, parent) {
+                        parent.appendChild(el);
+                    }
+                })
+
+                return renderer.createApp(options);
+            }
+        }
+
+    </script>
+    <script>
+        // 能够拦截用户对代理对象的访问，从而在值发生变化的时候作出响应式
+        function reactive(obj) {
+            return new Proxy(obj, {
+                get(target, key) {
+                    return target[key];
+                },
+
+                set(target, key, val) {
+                    target[key] = val;
+                    app.update();  //通知更新
+                }
+            })
+        }
+
+        const app = Vue.createApp({
+            // data() {
+            //     return {
+            //         title: 'ckx'
+            //     }
+            // },
+
+            setup() {
+                let state = reactive({
+                    title: 'Vue3'
+                });
+
+                setTimeout(() => {
+                    state.title = 'hello,Vue3'
+                }, 2000)
+
+                return state
+            }
+        });
+
+        app.mount('#app');
+    </script>
+</body>
+
+</html>
