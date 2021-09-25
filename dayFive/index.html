@@ -62,13 +62,16 @@
 
 
                                 // 更新视图
-                                this.update = function () {
+                                this.update = effect(() => {
                                     const el = options.render.call(proxy);
 
                                     // 追加到宿主区域中
                                     parent.innerHTML = '';
                                     insert(el, parent);
-                                }
+                                })
+
+                                // 触发更新
+                                trigger(target, key);
 
                                 // 初始渲染视图的时候更新一次
                                 this.update();
@@ -118,6 +121,60 @@
                     app.update();  //通知更新
                 }
             })
+        }
+
+
+        // 建立映射关系：依赖dep - 组件更新函数
+        const effectStack = [];  //临时存储副作用函数
+        function effect(fn) {
+            const eff = function () {
+                try {
+                    fn();
+                    effectStack.push(eff);
+                } finally {
+                    effectStack.pop();
+                }
+            }
+
+            eff();
+
+            return eff;
+        }
+
+        const targetMap = {   //保存映射关系
+        }
+        // 建立target，key和effectStack中存储的副作用函数之间的关系
+        function track(target, key) {
+            const effect = effectStack[effectStack.length - 1];
+
+            // 判断target为key的对象存不存在
+            let map = targetMap[target];
+            if (!map) {
+                // 首次get的target，要初始化一下
+                map = targetMap[target] = {};
+                // targetMap.set(target,{});
+            }
+
+            let deps = map[key];
+            if (!deps) {
+                deps = map[key] = [];
+            }
+            // 映射关系建立
+            if (deps.indexOf(effect) === -1) {
+                deps.push(effect);
+            }
+        }
+
+        // 触发更新
+        function trigger(target, key) {
+            const map = target[target];
+            if (map) {
+                const deps = map[key];
+
+                if (deps) {
+                    deps.forEach(dep => dep());
+                }
+            }
         }
 
         const app = Vue.createApp({
